@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кликер с уровнями</title>
+    <title>Кликер с уровнями и магазином</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,8 +13,8 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #321152; /* Фиолетовый цвет фона */
-            -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат при нажатии на мобильных устройствах */
+            background-color: #291040;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #counter-container {
@@ -24,36 +24,36 @@
         }
 
         #coinImage {
-            width: 50px; /* Размер изображения коина */
+            width: 50px;
             height: auto;
             margin-right: 10px;
         }
 
         #counter {
             font-size: 3em;
-            color: white; /* Цвет текста счетчика */
+            color: white;
         }
 
         #clickImage {
             cursor: pointer;
-            width: 250px; /* Увеличенный размер изображения */
+            width: 250px;
             height: auto;
             transition: transform 0.1s ease-in-out;
-            -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат на мобильных устройствах */
-            outline: none; /* Отключаем обводку при фокусе */
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         #clickImage:focus {
-            outline: none; /* Убираем фокус */
+            outline: none;
         }
 
         #clickImage:active {
-            transform: scale(0.95); /* Эффект при нажатии */
+            transform: scale(0.95);
         }
 
         img {
-            user-select: none; /* Отключаем выделение изображения */
-            -webkit-user-drag: none; /* Отключаем перетаскивание изображения */
+            user-select: none;
+            -webkit-user-drag: none;
         }
 
         #boost-container {
@@ -66,7 +66,7 @@
         #boostButton {
             padding: 10px 20px;
             font-size: 1.5em;
-            background-color: #FFD700; /* Золотой цвет кнопки Boost */
+            background-color: #FFD700;
             border: none;
             border-radius: 10px;
             cursor: pointer;
@@ -74,11 +74,11 @@
         }
 
         #boostButton:hover {
-            background-color: #FFC107; /* Более темный цвет при наведении */
+            background-color: #FFC107;
         }
 
         #boostButton:disabled {
-            background-color: #CCC; /* Серый цвет, когда Boost не доступен */
+            background-color: #CCC;
             cursor: not-allowed;
         }
 
@@ -88,16 +88,14 @@
             margin-top: 10px;
         }
 
-        /* Стиль уровня */
         #level {
             font-size: 2em;
             color: #FFD700;
             margin-top: 10px;
         }
 
-        /* Стиль поздравительной таблички */
         #levelUpModal {
-            display: none; /* Изначально скрыто */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -126,6 +124,33 @@
             border-radius: 5px;
         }
 
+        #shop-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #shopButton {
+            padding: 10px 20px;
+            font-size: 1.5em;
+            background-color: #32CD32;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #shopButton:hover {
+            background-color: #228B22;
+        }
+
+        #shopMessage {
+            color: white;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -148,6 +173,12 @@
         <div id="boostMessage"></div>
     </div>
 
+    <!-- Магазин -->
+    <div id="shop-container">
+        <button id="shopButton">Купить Автокликера (150 000 коинов)</button>
+        <div id="shopMessage"></div>
+    </div>
+
     <!-- Поздравительная табличка -->
     <div id="levelUpModal">
         <div id="levelUpModalContent">
@@ -157,7 +188,6 @@
     </div>
 
     <script>
-        // Получаем элементы по ID
         const counterDisplay = document.getElementById('counter');
         const clickImage = document.getElementById('clickImage');
         const boostButton = document.getElementById('boostButton');
@@ -165,48 +195,49 @@
         const levelDisplay = document.getElementById('level');
         const levelUpModal = document.getElementById('levelUpModal');
         const closeModal = document.getElementById('closeModal');
+        const shopButton = document.getElementById('shopButton');
+        const shopMessage = document.getElementById('shopMessage');
 
-        // Проверяем, есть ли сохраненное значение в localStorage
         let count = localStorage.getItem('coinCount') ? parseInt(localStorage.getItem('coinCount')) : 0;
-        let coinsPerClick = 1; // Начальное количество монет за клик
+        let coinsPerClick = 1;
         let level = localStorage.getItem('level') ? parseInt(localStorage.getItem('level')) : 1;
+        let autoClickerPurchased = localStorage.getItem('autoClicker') === 'true'; // Проверяем, был ли куплен автокликер
+        let autoClickerActive = false;
 
-        // Уровни и количество коинов, необходимых для каждого уровня
         const levelThresholds = [2500, 35000, 100000, 500000, 1000000];
+        const autoClickerPrice = 150000; // Стоимость автокликера
 
-        // Отображаем сохраненное значение на экране
         counterDisplay.textContent = count;
         levelDisplay.textContent = `Level: ${level}`;
 
-        // Функция для показа поздравительной таблички
+        if (autoClickerPurchased) {
+            activateAutoClicker(); // Активируем автокликер, если он был куплен
+        }
+
         function showLevelUpModal() {
             levelUpModal.style.display = 'flex';
         }
 
-        // Закрытие поздравительной таблички
-        closeModal.addEventListener('click', function() {
+        closeModal.addEventListener('click', function () {
             levelUpModal.style.display = 'none';
         });
 
-        // Функция проверки уровня
         function checkLevelUp() {
             if (level < levelThresholds.length && count >= levelThresholds[level - 1]) {
-                level++; // Увеличиваем уровень
+                level++;
                 levelDisplay.textContent = `Level: ${level}`;
-                localStorage.setItem('level', level); // Сохраняем уровень
-                showLevelUpModal(); // Показываем поздравительную табличку
+                localStorage.setItem('level', level);
+                showLevelUpModal();
             }
         }
 
-        // Функция, которая увеличивает счётчик при нажатии на изображение
-        clickImage.addEventListener('click', function() {
-            count += coinsPerClick; // Увеличиваем счетчик на coinsPerClick
-            counterDisplay.textContent = count; // Обновляем отображаемое значение
-            localStorage.setItem('coinCount', count); // Сохраняем значение в localStorage
-            checkLevelUp(); // Проверяем, нужно ли повысить уровень
+        clickImage.addEventListener('click', function () {
+            count += coinsPerClick;
+            counterDisplay.textContent = count;
+            localStorage.setItem('coinCount', count);
+            checkLevelUp();
         });
 
-        // Функция проверки времени с последнего использования Boost
         function checkBoostAvailability() {
             const lastBoostTime = localStorage.getItem('lastBoostTime');
             if (lastBoostTime) {
@@ -214,11 +245,11 @@
                 const timeSinceLastBoost = currentTime - parseInt(lastBoostTime);
                 const hoursUntilNextBoost = (86400000 - timeSinceLastBoost) / 3600000;
 
-                if (timeSinceLastBoost >= 86400000) { // 24 часа прошли
-                    boostButton.disabled = false; // Кнопка активна
+                if (timeSinceLastBoost >= 86400000) {
+                    boostButton.disabled = false;
                     boostMessage.textContent = 'Boost доступен!';
                 } else {
-                    boostButton.disabled = true; // Кнопка неактивна
+                    boostButton.disabled = true;
                     boostMessage.textContent = `Boost доступен через ${(hoursUntilNextBoost).toFixed(2)} часов.`;
                 }
             } else {
@@ -226,25 +257,50 @@
             }
         }
 
-        // Функция активации Boost
-        boostButton.addEventListener('click', function() {
-            coinsPerClick = 3; // Устанавливаем 3 монеты за клик
+        boostButton.addEventListener('click', function () {
+            coinsPerClick = 3;
             boostMessage.textContent = 'Boost активирован! В течение 1 минуты вы получаете по 3 коина за клик.';
-            boostButton.disabled = true; // Отключаем кнопку Boost
+            boostButton.disabled = true;
 
-            // Сохраняем текущее время как время активации Boost
             const currentTime = new Date().getTime();
             localStorage.setItem('lastBoostTime', currentTime);
 
-            // Через 1 минуту (60 000 мс) Boost отключится
-            setTimeout(function() {
-                coinsPerClick = 1; // Возвращаем 1 монету за клик
+            setTimeout(function () {
+                coinsPerClick = 1;
                 boostMessage.textContent = 'Boost завершен. Теперь вы снова получаете по 1 коину за клик.';
-                checkBoostAvailability(); // Проверяем возможность активации Boost
+                checkBoostAvailability();
             }, 60000); // 60 секунд
         });
 
-        // Проверка доступности Boost при загрузке страницы
+        shopButton.addEventListener('click', function () {
+            if (count >= autoClickerPrice && !autoClickerPurchased) {
+                count -= autoClickerPrice;
+                counterDisplay.textContent = count;
+                localStorage.setItem('coinCount', count);
+
+                autoClickerPurchased = true;
+                localStorage.setItem('autoClicker', 'true');
+                shopMessage.textContent = 'Автокликер куплен! Он будет приносить вам монеты, пока вы не в приложении.';
+
+                activateAutoClicker();
+            } else if (autoClickerPurchased) {
+                shopMessage.textContent = 'Автокликер уже куплен.';
+            } else {
+                shopMessage.textContent = 'Недостаточно коинов для покупки автокликера.';
+            }
+        });
+
+        function activateAutoClicker() {
+            if (autoClickerActive) return; // Предотвращаем повторную активацию
+
+            autoClickerActive = true;
+            setInterval(function () {
+                count += 1; // Добавляем 1 коин каждую секунду
+                counterDisplay.textContent = count;
+                localStorage.setItem('coinCount', count);
+            }, 1000); // Интервал 1 секунда
+        }
+
         window.onload = checkBoostAvailability;
     </script>
 
