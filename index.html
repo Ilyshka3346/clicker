@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кликер</title>
+    <title>Кликер с уровнями</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,8 +13,8 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #3d0d69; /* Фиолетовый цвет фона */
-            -webkit-tap-highlight-color: transparent;
+            background-color: #321152; /* Фиолетовый цвет фона */
+            -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат при нажатии на мобильных устройствах */
         }
 
         #counter-container {
@@ -39,25 +39,23 @@
             width: 250px; /* Увеличенный размер изображения */
             height: auto;
             transition: transform 0.1s ease-in-out;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
+            -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат на мобильных устройствах */
+            outline: none; /* Отключаем обводку при фокусе */
         }
 
         #clickImage:focus {
-            outline: none;
+            outline: none; /* Убираем фокус */
         }
 
         #clickImage:active {
             transform: scale(0.95); /* Эффект при нажатии */
-            outline: none;
         }
 
         img {
-            user-select: none;
-            -webkit-user-drag: none;
-            
+            user-select: none; /* Отключаем выделение изображения */
+            -webkit-user-drag: none; /* Отключаем перетаскивание изображения */
         }
-            
+
         #boost-container {
             margin-top: 20px;
             display: flex;
