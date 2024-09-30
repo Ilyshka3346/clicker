@@ -39,12 +39,25 @@
             width: 250px; /* Увеличенный размер изображения */
             height: auto;
             transition: transform 0.1s ease-in-out;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        #clickImage:focus {
+            outline: none;
         }
 
         #clickImage:active {
             transform: scale(0.95); /* Эффект при нажатии */
+            outline: none;
         }
 
+        img {
+            user-select: none;
+            -webkit-user-drag: none;
+            
+        }
+            
         #boost-container {
             margin-top: 20px;
             display: flex;
