@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>clicker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #8A2BE2; /* Фиолетовый цвет фона */
+        }
+
+        #counter-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        #coinImage {
+            width: 50px; /* Размер изображения коина */
+            height: auto;
+            margin-right: 10px;
+        }
+
+        #counter {
+            font-size: 3em;
+            color: white; /* Цвет текста счетчика */
+        }
+
+        #clickImage {
+            cursor: pointer;
+            width: 250px; /* Увеличенный размер изображения */
+            height: auto;
+            transition: transform 0.1s ease-in-out;
+            -webkit-tap-highlight-color: transparent; /* Убираем синее выделение на мобильных устройствах */
+        }
+
+        /* Снятие выделения и появления синего окна на мобильных устройствах */
+        #clickImage:focus {
+            outline: none; /* Отключаем рамку при фокусе */
+        }
+
+        #clickImage:active {
+            transform: scale(0.95); /* Эффект при нажатии */
+            outline: none; /* Отключаем выделение при активном нажатии */
+        }
+
+        #boost-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #boostButton, #infoButton {
+            padding: 10px 15px;
+            font-size: 1.2em;
+            background-color: #FFD700; /* Золотой цвет кнопки Boost */
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px;
+        }
+
+        #boostButton:hover, #infoButton:hover {
+            background-color: #FFC107; /* Более темный цвет при наведении */
+        }
+
+        #boostButton:disabled {
+            background-color: #CCC; /* Серый цвет, когда Boost не доступен */
+            cursor: not-allowed;
+        }
+
+        #boostMessage {
+            color: white;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+
+        #infoScreen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        #infoText {
+            font-size: 1.5em;
+            text-align: center;
+            margin: 20px;
+        }
+
+        #backButton {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            background-color: #FFD700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #backButton:hover {
+            background-color: #FFC107;
+        }
+
+        #progress-container {
+            width: 300px;
+            height: 20px;
+            background-color: #FFF;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 100%;
+            background-color: #32CD32; /* Зеленый цвет прогресс-бара */
+            transition: width 0.1s ease;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Контейнер для счетчика с изображением коина -->
+    <div id="counter-container">
+        <img id="coinImage" src="coin.png" alt="Коин">
+        <div id="counter">0</div>
+    </div>
+
+    <!-- Изображение, на которое можно кликать -->
+    <img id="clickImage" src="your-tap-image.png" alt="Кликни сюда">
+
+    <!-- Прогресс-бар -->
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <!-- Раздел Boost -->
+    <div id="boost-container">
+        <button id="boostButton">Активировать Boost</button>
+        <button id="infoButton">Информация</button>
+        <div id="boostMessage"></div>
+    </div>
+
+    <!-- Экран информации -->
+    <div id="infoScreen">
+        <div id="infoText">
+            В скором времени выйдет обновление, в которое мы добавим лидерборд и реферальные ссылки.
+        </div>
+        <button id="backButton">Назад</button>
+    </div>
+
+    <script>
+        // Получаем элементы по ID
+        const counterDisplay = document.getElementById('counter');
+        const clickImage = document.getElementById('clickImage');
+        const boostButton = document.getElementById('boostButton');
+        const boostMessage = document.getElementById('boostMessage');
+        const infoButton = document.getElementById('infoButton');
+        const infoScreen = document.getElementById('infoScreen');
+        const backButton = document.getElementById('backButton');
+        const progressBar = document.getElementById('progress-bar');
+
+        // Инициализируем параметры
+        let count = localStorage.getItem('coinCount') ? parseInt(localStorage.getItem('coinCount')) : 0;
+        let coinsPerClick = 1; // Начальное количество монет за клик
+        let maxProgress = 6000; // Максимальное значение прогресс-бара
+        let currentProgress = maxProgress; // Текущее значение прогресс-бара
+        let progressRestoreRate = 2; // Количество восстанавливаемых коинов в секунду
+
+        // Отображаем сохраненное значение на экране
+        counterDisplay.textContent = count;
+
+        // Функция обновления прогресс-бара
+        function updateProgressBar() {
+            let progressPercentage = (currentProgress / maxProgress) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+        }
+
+        // Обновляем прогресс-бар при загрузке страницы
+        updateProgressBar();
+
+        // Функция для уменьшения прогресса при каждом клике
+        clickImage.addEventListener('click', function() {
+            if (currentProgress > 0) {
+                count += coinsPerClick; // Увеличиваем счетчик на coinsPerClick
+                counterDisplay.textContent = count; // Обновляем отображаемое значение
+                localStorage.setItem('coinCount', count); // Сохраняем значение в localStorage
+
+                currentProgress -= 1; // Уменьшаем прогресс на 1
+                updateProgressBar(); // Обновляем прогресс-бар
+            }
+        });
+
+        // Восстанавливаем прогресс-баллы со скоростью 2 единицы в секунду
+        setInterval(function() {
+            if (currentProgress < maxProgress) {
+                currentProgress += progressRestoreRate; // Увеличиваем прогресс
+                if (currentProgress > maxProgress) {
+                    currentProgress = maxProgress; // Не превышаем максимальный лимит
+                }
+                updateProgressBar(); // Обновляем прогресс-бар
+            }
+        }, 1000);
+
+        // Функция проверки времени с последнего использования Boost
+        function checkBoostAvailability() {
+            const lastBoostTime = localStorage.getItem('lastBoostTime');
+            if (lastBoostTime) {
+                const currentTime = new Date().getTime();
+                const timeSinceLastBoost = currentTime - parseInt(lastBoostTime);
+                const hoursUntilNextBoost = (86400000 - timeSinceLastBoost) / 3600000;
+
+                if (timeSinceLastBoost >= 86400000) { // 24 часа прошли
+                    boostButton.disabled = false; // Кнопка активна
+                    boostMessage.textContent = 'Boost доступен!';
+                } else {
+                    boostButton.disabled = true; // Кнопка неактивна
+                    boostMessage.textContent = `Boost доступен через ${(hoursUntilNextBoost).toFixed(2)} часов.`;
+                }
+            } else {
+                boostMessage.textContent = 'Boost доступен!';
+            }
+        }
+
+        // Функция активации Boost
+        boostButton.addEventListener('click', function() {
+            coinsPerClick = 3; // Устанавливаем 3 монеты за клик
+            boostMessage.textContent = 'Boost активирован! В течение 1 минуты вы получаете по 3 коина за клик.';
+            boostButton.disabled = true; // Отключаем кнопку Boost
+
+            // Сохраняем текущее время как время активации Boost
+            const currentTime = new Date().getTime();
+            localStorage.setItem('lastBoostTime', currentTime);
+
+            // Через 1 минуту (60 000 мс) Boost отключится
+            setTimeout(function() {
+                coinsPerClick = 1; // Возвращаем 1 монету за клик
+                boostMessage.textContent = 'Boost завершен. Теперь вы снова получаете по 1 коину за клик.';
+                checkBoostAvailability(); // Проверяем возможность активации Boost
+            }, 60000); // 60 секунд
+        });
+
+        // Показать экран информации
+        infoButton.addEventListener('click', function() {
+            infoScreen.style.display = 'flex'; // Показываем экран информации
+        });
+
+        // Вернуться назад к кликеру
+        backButton.addEventListener('click', function() {
+            infoScreen.style.display = 'none'; // Скрываем экран информации
+        });
+
+        // Проверка доступности Boost при загрузке страницы
+        window.onload = checkBoostAvailability;
+    </script>
+
+</body>
+</html>
