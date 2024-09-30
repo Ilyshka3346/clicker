@@ -13,7 +13,7 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #291040;
+            background-color: #8A2BE2;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -206,12 +206,14 @@
 
         const levelThresholds = [2500, 35000, 100000, 500000, 1000000];
         const autoClickerPrice = 150000; // Стоимость автокликера
+        const autoClickerDuration = 3 * 60 * 60 * 1000; // 3 часа в миллисекундах
+        const autoClickerCoinsPerSecond = 1; // Количество монет за 1 секунду работы автокликера
 
         counterDisplay.textContent = count;
         levelDisplay.textContent = `Level: ${level}`;
 
         if (autoClickerPurchased) {
-            activateAutoClicker(); // Активируем автокликер, если он был куплен
+            checkAutoClicker();
         }
 
         function showLevelUpModal() {
@@ -269,39 +271,57 @@
                 coinsPerClick = 1;
                 boostMessage.textContent = 'Boost завершен. Теперь вы снова получаете по 1 коину за клик.';
                 checkBoostAvailability();
-            }, 60000); // 60 секунд
+            }, 60000);
         });
 
         shopButton.addEventListener('click', function () {
             if (count >= autoClickerPrice && !autoClickerPurchased) {
                 count -= autoClickerPrice;
-                counterDisplay.textContent = count;
                 localStorage.setItem('coinCount', count);
-
-                autoClickerPurchased = true;
                 localStorage.setItem('autoClicker', 'true');
-                shopMessage.textContent = 'Автокликер куплен! Он будет приносить вам монеты, пока вы не в приложении.';
-
+                shopMessage.textContent = 'Автокликер куплен! Он будет приносить вам монеты в течение 3 часов, если вы не в игре.';
                 activateAutoClicker();
             } else if (autoClickerPurchased) {
                 shopMessage.textContent = 'Автокликер уже куплен.';
             } else {
                 shopMessage.textContent = 'Недостаточно коинов для покупки автокликера.';
             }
+            counterDisplay.textContent = count;
         });
 
+        function checkAutoClicker() {
+            const lastVisitTime = localStorage.getItem('lastVisitTime');
+            const currentTime = new Date().getTime();
+
+            if (lastVisitTime) {
+                const timeAway = currentTime - parseInt(lastVisitTime);
+                const maxAutoClickTime = Math.min(timeAway, autoClickerDuration); // Ограничиваем временем в 3 часа
+
+                const autoClickerCoins = Math.floor(maxAutoClickTime / 1000) * autoClickerCoinsPerSecond;
+                count += autoClickerCoins;
+                counterDisplay.textContent = count;
+                localStorage.setItem('coinCount', count);
+            }
+
+            localStorage.setItem('lastVisitTime', currentTime);
+            activateAutoClicker();
+        }
+
         function activateAutoClicker() {
-            if (autoClickerActive) return; // Предотвращаем повторную активацию
+            if (autoClickerActive) return;
 
             autoClickerActive = true;
             setInterval(function () {
-                count += 1; // Добавляем 1 коин каждую секунду
+                count += autoClickerCoinsPerSecond;
                 counterDisplay.textContent = count;
                 localStorage.setItem('coinCount', count);
-            }, 1000); // Интервал 1 секунда
+            }, 1000);
         }
 
         window.onload = checkBoostAvailability;
+        window.onbeforeunload = function () {
+            localStorage.setItem('lastVisitTime', new Date().getTime());
+        };
     </script>
 
 </body>
