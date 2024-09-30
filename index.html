@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>clicker</title>
+    <title>Кликер с уровнями</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,17 +38,10 @@
             width: 250px; /* Увеличенный размер изображения */
             height: auto;
             transition: transform 0.1s ease-in-out;
-            -webkit-tap-highlight-color: transparent; /* Убираем синее выделение на мобильных устройствах */
-        }
-
-        /* Снятие выделения и появления синего окна на мобильных устройствах */
-        #clickImage:focus {
-            outline: none; /* Отключаем рамку при фокусе */
         }
 
         #clickImage:active {
             transform: scale(0.95); /* Эффект при нажатии */
-            outline: none; /* Отключаем выделение при активном нажатии */
         }
 
         #boost-container {
@@ -58,18 +51,17 @@
             align-items: center;
         }
 
-        #boostButton, #infoButton {
-            padding: 10px 15px;
-            font-size: 1.2em;
+        #boostButton {
+            padding: 10px 20px;
+            font-size: 1.5em;
             background-color: #FFD700; /* Золотой цвет кнопки Boost */
             border: none;
             border-radius: 10px;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin: 10px;
         }
 
-        #boostButton:hover, #infoButton:hover {
+        #boostButton:hover {
             background-color: #FFC107; /* Более темный цвет при наведении */
         }
 
@@ -84,56 +76,42 @@
             margin-top: 10px;
         }
 
-        #infoScreen {
-            display: none;
-            position: absolute;
+        /* Стиль уровня */
+        #level {
+            font-size: 2em;
+            color: #FFD700;
+            margin-top: 10px;
+        }
+
+        /* Стиль поздравительной таблички */
+        #levelUpModal {
+            display: none; /* Изначально скрыто */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
             justify-content: center;
-            z-index: 10;
-        }
-
-        #infoText {
-            font-size: 1.5em;
+            align-items: center;
             text-align: center;
-            margin: 20px;
         }
 
-        #backButton {
-            padding: 10px 20px;
-            font-size: 1.2em;
-            background-color: #FFD700;
-            border: none;
+        #levelUpModalContent {
+            background-color: #fff;
+            padding: 20px;
             border-radius: 10px;
+            color: #000;
+        }
+
+        #closeModal {
+            margin-top: 10px;
+            padding: 5px 10px;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #backButton:hover {
-            background-color: #FFC107;
-        }
-
-        #progress-container {
-            width: 300px;
-            height: 20px;
-            background-color: #FFF;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 20px;
-        }
-
-        #progress-bar {
-            width: 100%;
-            height: 100%;
-            background-color: #32CD32; /* Зеленый цвет прогресс-бара */
-            transition: width 0.1s ease;
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            border-radius: 5px;
         }
 
     </style>
@@ -146,27 +124,24 @@
         <div id="counter">0</div>
     </div>
 
+    <!-- Уровень игрока -->
+    <div id="level">Level: 1</div>
+
     <!-- Изображение, на которое можно кликать -->
     <img id="clickImage" src="your-tap-image.png" alt="Кликни сюда">
-
-    <!-- Прогресс-бар -->
-    <div id="progress-container">
-        <div id="progress-bar"></div>
-    </div>
 
     <!-- Раздел Boost -->
     <div id="boost-container">
         <button id="boostButton">Активировать Boost</button>
-        <button id="infoButton">Информация</button>
         <div id="boostMessage"></div>
     </div>
 
-    <!-- Экран информации -->
-    <div id="infoScreen">
-        <div id="infoText">
-            В скором времени выйдет обновление, в которое мы добавим лидерборд и реферальные ссылки.
+    <!-- Поздравительная табличка -->
+    <div id="levelUpModal">
+        <div id="levelUpModalContent">
+            <h2>Поздравляем! Вы повысили уровень!</h2>
+            <button id="closeModal">Закрыть</button>
         </div>
-        <button id="backButton">Назад</button>
     </div>
 
     <script>
@@ -175,52 +150,49 @@
         const clickImage = document.getElementById('clickImage');
         const boostButton = document.getElementById('boostButton');
         const boostMessage = document.getElementById('boostMessage');
-        const infoButton = document.getElementById('infoButton');
-        const infoScreen = document.getElementById('infoScreen');
-        const backButton = document.getElementById('backButton');
-        const progressBar = document.getElementById('progress-bar');
+        const levelDisplay = document.getElementById('level');
+        const levelUpModal = document.getElementById('levelUpModal');
+        const closeModal = document.getElementById('closeModal');
 
-        // Инициализируем параметры
+        // Проверяем, есть ли сохраненное значение в localStorage
         let count = localStorage.getItem('coinCount') ? parseInt(localStorage.getItem('coinCount')) : 0;
         let coinsPerClick = 1; // Начальное количество монет за клик
-        let maxProgress = 6000; // Максимальное значение прогресс-бара
-        let currentProgress = maxProgress; // Текущее значение прогресс-бара
-        let progressRestoreRate = 2; // Количество восстанавливаемых коинов в секунду
+        let level = localStorage.getItem('level') ? parseInt(localStorage.getItem('level')) : 1;
+
+        // Уровни и количество коинов, необходимых для каждого уровня
+        const levelThresholds = [2500, 35000, 100000, 500000, 1000000];
 
         // Отображаем сохраненное значение на экране
         counterDisplay.textContent = count;
+        levelDisplay.textContent = `Level: ${level}`;
 
-        // Функция обновления прогресс-бара
-        function updateProgressBar() {
-            let progressPercentage = (currentProgress / maxProgress) * 100;
-            progressBar.style.width = `${progressPercentage}%`;
+        // Функция для показа поздравительной таблички
+        function showLevelUpModal() {
+            levelUpModal.style.display = 'flex';
         }
 
-        // Обновляем прогресс-бар при загрузке страницы
-        updateProgressBar();
-
-        // Функция для уменьшения прогресса при каждом клике
-        clickImage.addEventListener('click', function() {
-            if (currentProgress > 0) {
-                count += coinsPerClick; // Увеличиваем счетчик на coinsPerClick
-                counterDisplay.textContent = count; // Обновляем отображаемое значение
-                localStorage.setItem('coinCount', count); // Сохраняем значение в localStorage
-
-                currentProgress -= 1; // Уменьшаем прогресс на 1
-                updateProgressBar(); // Обновляем прогресс-бар
-            }
+        // Закрытие поздравительной таблички
+        closeModal.addEventListener('click', function() {
+            levelUpModal.style.display = 'none';
         });
 
-        // Восстанавливаем прогресс-баллы со скоростью 2 единицы в секунду
-        setInterval(function() {
-            if (currentProgress < maxProgress) {
-                currentProgress += progressRestoreRate; // Увеличиваем прогресс
-                if (currentProgress > maxProgress) {
-                    currentProgress = maxProgress; // Не превышаем максимальный лимит
-                }
-                updateProgressBar(); // Обновляем прогресс-бар
+        // Функция проверки уровня
+        function checkLevelUp() {
+            if (level < levelThresholds.length && count >= levelThresholds[level - 1]) {
+                level++; // Увеличиваем уровень
+                levelDisplay.textContent = `Level: ${level}`;
+                localStorage.setItem('level', level); // Сохраняем уровень
+                showLevelUpModal(); // Показываем поздравительную табличку
             }
-        }, 1000);
+        }
+
+        // Функция, которая увеличивает счётчик при нажатии на изображение
+        clickImage.addEventListener('click', function() {
+            count += coinsPerClick; // Увеличиваем счетчик на coinsPerClick
+            counterDisplay.textContent = count; // Обновляем отображаемое значение
+            localStorage.setItem('coinCount', count); // Сохраняем значение в localStorage
+            checkLevelUp(); // Проверяем, нужно ли повысить уровень
+        });
 
         // Функция проверки времени с последнего использования Boost
         function checkBoostAvailability() {
@@ -258,16 +230,6 @@
                 boostMessage.textContent = 'Boost завершен. Теперь вы снова получаете по 1 коину за клик.';
                 checkBoostAvailability(); // Проверяем возможность активации Boost
             }, 60000); // 60 секунд
-        });
-
-        // Показать экран информации
-        infoButton.addEventListener('click', function() {
-            infoScreen.style.display = 'flex'; // Показываем экран информации
-        });
-
-        // Вернуться назад к кликеру
-        backButton.addEventListener('click', function() {
-            infoScreen.style.display = 'none'; // Скрываем экран информации
         });
 
         // Проверка доступности Boost при загрузке страницы
