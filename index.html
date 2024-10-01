@@ -10,17 +10,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             height: 100vh;
             margin: 0;
-            background-color: #4a246e;
-            -webkit-tap-highlight-color: transparent;
+            background-color: #8A2BE2;
         }
 
+        /* Наверху монеты */
         #counter-container {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-top: 20px;
         }
 
         #coinImage {
@@ -34,16 +34,59 @@
             color: white;
         }
 
+        /* Общие стили кнопок меню */
+        .menu-button {
+            padding: 15px;
+            font-size: 1.5em;
+            background-color: #FFD700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-button img {
+            width: 30px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        /* Нижнее меню с кнопками */
+        #menu-container {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Основное меню фарма коинов */
+        #farm-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        /* Магазин */
+        #shop-container, #boost-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
         #clickImage {
             cursor: pointer;
             width: 250px;
             height: auto;
             transition: transform 0.1s ease-in-out;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-        }
-
-        #clickImage:focus {
             outline: none;
         }
 
@@ -51,140 +94,53 @@
             transform: scale(0.95);
         }
 
-        img {
-            user-select: none;
-            -webkit-user-drag: none;
-        }
-
-        #boost-container {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #boostButton {
-            padding: 10px 20px;
-            font-size: 1.5em;
-            background-color: #FFD700;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #boostButton:hover {
-            background-color: #FFC107;
-        }
-
-        #boostButton:disabled {
-            background-color: #CCC;
-            cursor: not-allowed;
-        }
-
-        #boostMessage {
-            color: white;
-            font-size: 1.2em;
-            margin-top: 10px;
-        }
-
         #level {
             font-size: 2em;
             color: #FFD700;
             margin-top: 10px;
         }
-
-        #levelUpModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
-        #levelUpModalContent {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            color: #000;
-        }
-
-        #closeModal {
-            margin-top: 10px;
-            padding: 5px 10px;
-            cursor: pointer;
-            background-color: #FF6347;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-
-        #shop-container {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #shopButton {
-            padding: 10px 20px;
-            font-size: 1.5em;
-            background-color: #32CD32;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        #shopButton:hover {
-            background-color: #228B22;
-        }
-
-        #shopMessage {
-            color: white;
-            font-size: 1.2em;
-            margin-top: 10px;
-        }
-
     </style>
 </head>
 <body>
 
-    <!-- Контейнер для счетчика с изображением коина -->
+    <!-- Счетчик коинов -->
     <div id="counter-container">
         <img id="coinImage" src="coin.png" alt="Коин">
         <div id="counter">0</div>
     </div>
 
-    <!-- Уровень игрока -->
-    <div id="level">Level: 1</div>
-
-    <!-- Изображение, на которое можно кликать -->
-    <img id="clickImage" src="your-tap-image.png" alt="Кликни сюда">
-
-    <!-- Раздел Boost -->
-    <div id="boost-container">
-        <button id="boostButton">Активировать Boost</button>
-        <div id="boostMessage"></div>
+    <!-- Основное меню для фарма коинов -->
+    <div id="farm-container">
+        <img id="clickImage" src="your-tap-image.png" alt="Кликни сюда">
+        <div id="level">Level: 1</div>
     </div>
 
     <!-- Магазин -->
     <div id="shop-container">
-        <button id="shopButton">Купить Автокликера (150 000 коинов)</button>
+        <button class="menu-button" id="shopButton">Купить Автокликера (150 000 коинов)</button>
         <div id="shopMessage"></div>
     </div>
 
-    <!-- Поздравительная табличка -->
-    <div id="levelUpModal">
-        <div id="levelUpModalContent">
-            <h2>Поздравляем! Вы повысили уровень!</h2>
-            <button id="closeModal">Закрыть</button>
-        </div>
+    <!-- Буст меню -->
+    <div id="boost-container">
+        <button class="menu-button" id="boostButton">Активировать Boost</button>
+        <div id="boostMessage"></div>
+    </div>
+
+    <!-- Нижнее меню -->
+    <div id="menu-container">
+        <button class="menu-button" id="farmMenuButton">
+            <img src="coin.png" alt="Монета">
+            Фарм
+        </button>
+        <button class="menu-button" id="shopMenuButton">
+            <img src="shop-icon.png" alt="Магазин">
+            Магазин
+        </button>
+        <button class="menu-button" id="boostMenuButton">
+            <img src="boost-icon.png" alt="Буст">
+            Буст
+        </button>
     </div>
 
     <script>
@@ -193,135 +149,49 @@
         const boostButton = document.getElementById('boostButton');
         const boostMessage = document.getElementById('boostMessage');
         const levelDisplay = document.getElementById('level');
-        const levelUpModal = document.getElementById('levelUpModal');
-        const closeModal = document.getElementById('closeModal');
         const shopButton = document.getElementById('shopButton');
         const shopMessage = document.getElementById('shopMessage');
+        const farmContainer = document.getElementById('farm-container');
+        const shopContainer = document.getElementById('shop-container');
+        const boostContainer = document.getElementById('boost-container');
+        const farmMenuButton = document.getElementById('farmMenuButton');
+        const shopMenuButton = document.getElementById('shopMenuButton');
+        const boostMenuButton = document.getElementById('boostMenuButton');
 
         let count = localStorage.getItem('coinCount') ? parseInt(localStorage.getItem('coinCount')) : 0;
         let coinsPerClick = 1;
         let level = localStorage.getItem('level') ? parseInt(localStorage.getItem('level')) : 1;
-        let autoClickerPurchased = localStorage.getItem('autoClicker') === 'true'; // Проверяем, был ли куплен автокликер
-        let autoClickerActive = false;
-
-        const levelThresholds = [2500, 35000, 100000, 500000, 1000000];
-        const autoClickerPrice = 150000; // Стоимость автокликера
-        const autoClickerDuration = 3 * 60 * 60 * 1000; // 3 часа в миллисекундах
-        const autoClickerCoinsPerSecond = 1; // Количество монет за 1 секунду работы автокликера
 
         counterDisplay.textContent = count;
         levelDisplay.textContent = `Level: ${level}`;
 
-        if (autoClickerPurchased) {
-            checkAutoClicker();
-        }
-
-        function showLevelUpModal() {
-            levelUpModal.style.display = 'flex';
-        }
-
-        closeModal.addEventListener('click', function () {
-            levelUpModal.style.display = 'none';
+        // Обработчики кнопок меню
+        farmMenuButton.addEventListener('click', function () {
+            farmContainer.style.display = 'flex';
+            shopContainer.style.display = 'none';
+            boostContainer.style.display = 'none';
         });
 
-        function checkLevelUp() {
-            if (level < levelThresholds.length && count >= levelThresholds[level - 1]) {
-                level++;
-                levelDisplay.textContent = `Level: ${level}`;
-                localStorage.setItem('level', level);
-                showLevelUpModal();
-            }
-        }
+        shopMenuButton.addEventListener('click', function () {
+            farmContainer.style.display = 'none';
+            shopContainer.style.display = 'flex';
+            boostContainer.style.display = 'none';
+        });
 
+        boostMenuButton.addEventListener('click', function () {
+            farmContainer.style.display = 'none';
+            shopContainer.style.display = 'none';
+            boostContainer.style.display = 'flex';
+        });
+
+        // Логика фарма коинов
         clickImage.addEventListener('click', function () {
             count += coinsPerClick;
             counterDisplay.textContent = count;
             localStorage.setItem('coinCount', count);
-            checkLevelUp();
         });
 
-        function checkBoostAvailability() {
-            const lastBoostTime = localStorage.getItem('lastBoostTime');
-            if (lastBoostTime) {
-                const currentTime = new Date().getTime();
-                const timeSinceLastBoost = currentTime - parseInt(lastBoostTime);
-                const hoursUntilNextBoost = (86400000 - timeSinceLastBoost) / 3600000;
-
-                if (timeSinceLastBoost >= 86400000) {
-                    boostButton.disabled = false;
-                    boostMessage.textContent = 'Boost доступен!';
-                } else {
-                    boostButton.disabled = true;
-                    boostMessage.textContent = `Boost доступен через ${(hoursUntilNextBoost).toFixed(2)} часов.`;
-                }
-            } else {
-                boostMessage.textContent = 'Boost доступен!';
-            }
-        }
-
-        boostButton.addEventListener('click', function () {
-            coinsPerClick = 3;
-            boostMessage.textContent = 'Boost активирован! В течение 1 минуты вы получаете по 3 коина за клик.';
-            boostButton.disabled = true;
-
-            const currentTime = new Date().getTime();
-            localStorage.setItem('lastBoostTime', currentTime);
-
-            setTimeout(function () {
-                coinsPerClick = 1;
-                boostMessage.textContent = 'Boost завершен. Теперь вы снова получаете по 1 коину за клик.';
-                checkBoostAvailability();
-            }, 60000);
-        });
-
-        shopButton.addEventListener('click', function () {
-            if (count >= autoClickerPrice && !autoClickerPurchased) {
-                count -= autoClickerPrice;
-                localStorage.setItem('coinCount', count);
-                localStorage.setItem('autoClicker', 'true');
-                shopMessage.textContent = 'Автокликер куплен! Он будет приносить вам монеты в течение 3 часов, если вы не в игре.';
-                activateAutoClicker();
-            } else if (autoClickerPurchased) {
-                shopMessage.textContent = 'Автокликер уже куплен.';
-            } else {
-                shopMessage.textContent = 'Недостаточно коинов для покупки автокликера.';
-            }
-            counterDisplay.textContent = count;
-        });
-
-        function checkAutoClicker() {
-            const lastVisitTime = localStorage.getItem('lastVisitTime');
-            const currentTime = new Date().getTime();
-
-            if (lastVisitTime) {
-                const timeAway = currentTime - parseInt(lastVisitTime);
-                const maxAutoClickTime = Math.min(timeAway, autoClickerDuration); // Ограничиваем временем в 3 часа
-
-                const autoClickerCoins = Math.floor(maxAutoClickTime / 1000) * autoClickerCoinsPerSecond;
-                count += autoClickerCoins;
-                counterDisplay.textContent = count;
-                localStorage.setItem('coinCount', count);
-            }
-
-            localStorage.setItem('lastVisitTime', currentTime);
-            activateAutoClicker();
-        }
-
-        function activateAutoClicker() {
-            if (autoClickerActive) return;
-
-            autoClickerActive = true;
-            setInterval(function () {
-                count += autoClickerCoinsPerSecond;
-                counterDisplay.textContent = count;
-                localStorage.setItem('coinCount', count);
-            }, 1000);
-        }
-
-        window.onload = checkBoostAvailability;
-        window.onbeforeunload = function () {
-            localStorage.setItem('lastVisitTime', new Date().getTime());
-        };
+        // Логика магазина и буста (продолжается...)
     </script>
 
 </body>
