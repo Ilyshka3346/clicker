@@ -35,12 +35,16 @@
         }
 
         /* Основное меню для фарма */
-        #farm-container {
-            display: flex;
+        .menu {
+            display: none; /* Скрываем все меню по умолчанию */
             flex-direction: column;
             align-items: center;
             justify-content: center;
             flex-grow: 1;
+        }
+
+        #farm-container {
+            display: flex; /* Показываем только фарм-меню по умолчанию */
         }
 
         /* Изображение для кликов */
@@ -67,17 +71,17 @@
             position: fixed;
             bottom: 20px;
             display: flex;
-            justify-content: center; /* Центрируем кнопки */
-            width: 100%; /* Устанавливаем ширину меню на 100% */
+            justify-content: center;
+            width: 100%;
             padding: 10px;
         }
 
         .menu-button {
-            width: 60px; /* Уменьшаем размер кнопок */
+            width: 60px;
             height: 60px;
             background-color: #202053;
             border-radius: 50%;
-            margin: 0 10px; /* Добавляем отступ между кнопками */
+            margin: 0 10px;
             position: relative;
             display: flex;
             justify-content: center;
@@ -91,7 +95,7 @@
         }
 
         .menu-button img {
-            width: 35px; /* Уменьшаем иконки для кнопок */
+            width: 35px;
             height: 35px;
             border-radius: 50%;
         }
@@ -106,7 +110,6 @@
         }
 
         @media (max-width: 768px) {
-            /* Для мобильных устройств уменьшаем размер кнопок */
             .menu-button {
                 width: 50px;
                 height: 50px;
@@ -118,7 +121,7 @@
             }
 
             #counter {
-                font-size: 2.5em; /* Уменьшаем шрифт для коинов на мобильных устройствах */
+                font-size: 2.5em;
             }
 
             #level {
@@ -137,9 +140,23 @@
     </div>
 
     <!-- Основное меню для фарма коинов -->
-    <div id="farm-container">
+    <div id="farm-container" class="menu">
         <img id="clickImage" src="your-tap-image.png" alt="Кликни сюда">
         <div id="level">Level: 1</div>
+    </div>
+
+    <!-- Меню магазина -->
+    <div id="shop-container" class="menu">
+        <h2>Магазин</h2>
+        <p>Купите автокликер за 150 000 коинов</p>
+        <button>Купить Автокликера</button>
+    </div>
+
+    <!-- Меню буста -->
+    <div id="boost-container" class="menu">
+        <h2>Boost</h2>
+        <p>Активируйте boost на 1 минуту для увеличения коинов за клик!</p>
+        <button>Активировать Boost</button>
     </div>
 
     <!-- Нижнее меню -->
@@ -154,9 +171,6 @@
             <img src="boost-icon.png" alt="Буст">
         </div>
     </div>
-
-    <!-- Boost текст -->
-    <div class="boost">🔥 Boost</div>
 
     <script>
         const counterDisplay = document.getElementById('counter');
@@ -181,18 +195,31 @@
             localStorage.setItem('coinCount', count);
         });
 
-        // Логика переключения меню
+        // Логика переключения между разделами
         farmMenuButton.addEventListener('click', function () {
-            // показать фарм меню
+            showMenu(farmContainer);
         });
 
         shopMenuButton.addEventListener('click', function () {
-            // показать магазин
+            showMenu(shopContainer);
         });
 
         boostMenuButton.addEventListener('click', function () {
-            // показать буст
+            showMenu(boostContainer);
         });
+
+        // Функция для переключения видимых меню
+        function showMenu(menu) {
+            farmContainer.style.display = 'none';
+            shopContainer.style.display = 'none';
+            boostContainer.style.display = 'none';
+
+            menu.style.display = 'flex'; // Показываем выбранное меню
+        }
+
+        // Показываем фарм-меню по умолчанию при загрузке
+        showMenu(farmContainer);
+
     </script>
 
 </body>
