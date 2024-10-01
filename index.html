@@ -100,6 +100,21 @@
             border-radius: 50%;
         }
 
+        /* Убираем выделение при нажатии */
+        button, .menu-button img {
+            outline: none;
+        }
+
+        /* Убираем фокусное выделение на всех элементах */
+        *:focus {
+            outline: none;
+        }
+
+        /* Убираем голубое выделение при клике на мобильных устройствах */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
         /* Boost текст */
         .boost {
             position: absolute;
@@ -155,10 +170,12 @@
     <!-- Меню буста -->
     <div id="boost-container" class="menu">
         <h2>Boost</h2>
-        <p>Активируйте boost на 1 минуту для увеличения коинов за клик!</p>
+        <p>Активируйте Boost на 1 минуту (можно активировать 1 раз в 24 часа)</p>
         <button id="activateBoostButton">Активировать Boost</button>
+        <p>Следующая активация через: <span id="boostCooldownDisplay"></span></p>
         <p>Купите +1 коин за клик (максимум до 10 коинов за клик)</p>
         <button id="buyClickUpgradeButton">Купить улучшение клика</button>
+        <p>Текущая стоимость улучшения: <span id="clickUpgradeCostDisplay">10000</span> коинов</p>
     </div>
 
     <!-- Нижнее меню -->
@@ -186,14 +203,18 @@
         const buyAutoClickerButton = document.getElementById('buyAutoClickerButton');
         const activateBoostButton = document.getElementById('activateBoostButton');
         const buyClickUpgradeButton = document.getElementById('buyClickUpgradeButton');
+        const boostCooldownDisplay = document.getElementById('boostCooldownDisplay');
+        const clickUpgradeCostDisplay = document.getElementById('clickUpgradeCostDisplay');
 
         let count = localStorage.getItem('coinCount') ? parseInt(localStorage.getItem('coinCount')) : 0;
         let coinsPerClick = localStorage.getItem('coinsPerClick') ? parseInt(localStorage.getItem('coinsPerClick')) : 1;
         let autoClickerActive = localStorage.getItem('autoClickerActive') === 'true' ? true : false;
         let boostActive = false;
+        let boostLastActivated = localStorage.getItem('boostLastActivated') ? new Date(localStorage.getItem('boostLastActivated')) : null;
         let level = localStorage.getItem('level') ? parseInt(localStorage.getItem('level')) : 1;
         let autoClickerTimeout;
-        let clickUpgradeCost = 100000;
+        let clickUpgradeCost = localStorage.getItem('clickUpgradeCost') ? parseInt(localStorage.getItem('clickUpgradeCost')) : 10000;
+        let clickUpgradeLevel = localStorage.getItem('clickUpgradeLevel') ? parseInt(localStorage.getItem('clickUpgradeLevel')) : 1;
 
         counterDisplay.textContent = count;
 
@@ -216,6 +237,7 @@
 
         boostMenuButton.addEventListener('click', function () {
             showMenu(boostContainer);
+            updateBoostCooldown();
         });
 
         // Функция для переключения видимых меню
@@ -233,55 +255,4 @@
                 count -= 150000;
                 localStorage.setItem('coinCount', count);
                 autoClickerActive = true;
-                localStorage.setItem('autoClickerActive', 'true');
-                startAutoClicker();
-            }
-        });
-
-        function startAutoClicker() {
-            autoClickerTimeout = setInterval(function () {
-                count += 1;
-                counterDisplay.textContent = count;
-                localStorage.setItem('coinCount', count);
-            }, 2000);
-
-            // Автокликер работает 3 часа
-            setTimeout(function () {
-                clearInterval(autoClickerTimeout);
-                autoClickerActive = false;
-                localStorage.setItem('autoClickerActive', 'false');
-            }, 3 * 60 * 60 * 1000);
-        }
-
-        if (autoClickerActive) {
-            startAutoClicker();
-        }
-
-        // Активировать буст
-        activateBoostButton.addEventListener('click', function () {
-            if (!boostActive) {
-                boostActive = true;
-                setTimeout(function () {
-                    boostActive = false;
-                }, 60000); // Буст активен 1 минуту
-            }
-        });
-
-        // Покупка +1 клик
-        buyClickUpgradeButton.addEventListener('click', function () {
-            if (count >= clickUpgradeCost && coinsPerClick < 10) {
-                count -= clickUpgradeCost;
-                coinsPerClick += 1;
-                clickUpgradeCost += 100000; // Увеличиваем стоимость улучшения
-                localStorage.setItem('coinCount', count);
-                localStorage.setItem('coinsPerClick', coinsPerClick);
-            }
-        });
-
-        // Показываем фарм-меню по умолчанию при загрузке
-        showMenu(farmContainer);
-
-    </script>
-
-</body>
-</html>
+                localStorage.set 
