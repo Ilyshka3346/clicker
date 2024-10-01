@@ -13,10 +13,10 @@
             justify-content: space-between;
             height: 100vh;
             margin: 0;
-            background-color: #8A2BE2;
+            background-color: #0a0a23;
         }
 
-        /* Наверху монеты */
+        /* Счетчик коинов сверху */
         #counter-container {
             display: flex;
             align-items: center;
@@ -34,37 +34,7 @@
             color: white;
         }
 
-        /* Общие стили кнопок меню */
-        .menu-button {
-            padding: 15px;
-            font-size: 1.5em;
-            background-color: #FFD700;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .menu-button img {
-            width: 30px;
-            height: auto;
-            margin-right: 10px;
-        }
-
-        /* Нижнее меню с кнопками */
-        #menu-container {
-            position: fixed;
-            bottom: 20px;
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        /* Основное меню фарма коинов */
+        /* Основное меню для фарма */
         #farm-container {
             display: flex;
             flex-direction: column;
@@ -73,15 +43,7 @@
             flex-grow: 1;
         }
 
-        /* Магазин */
-        #shop-container, #boost-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-        }
-
+        /* Изображение для кликов */
         #clickImage {
             cursor: pointer;
             width: 250px;
@@ -99,6 +61,71 @@
             color: #FFD700;
             margin-top: 10px;
         }
+
+        /* Нижнее меню */
+        #menu-container {
+            position: fixed;
+            bottom: 20px;
+            display: flex;
+            justify-content: center; /* Центрируем кнопки */
+            width: 100%; /* Устанавливаем ширину меню на 100% */
+            padding: 10px;
+        }
+
+        .menu-button {
+            width: 60px; /* Уменьшаем размер кнопок */
+            height: 60px;
+            background-color: #202053;
+            border-radius: 50%;
+            margin: 0 10px; /* Добавляем отступ между кнопками */
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .menu-button:hover {
+            transform: scale(1.1);
+        }
+
+        .menu-button img {
+            width: 35px; /* Уменьшаем иконки для кнопок */
+            height: 35px;
+            border-radius: 50%;
+        }
+
+        /* Boost текст */
+        .boost {
+            position: absolute;
+            bottom: 120px;
+            font-size: 20px;
+            color: #f5a623;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            /* Для мобильных устройств уменьшаем размер кнопок */
+            .menu-button {
+                width: 50px;
+                height: 50px;
+            }
+
+            .menu-button img {
+                width: 30px;
+                height: 30px;
+            }
+
+            #counter {
+                font-size: 2.5em; /* Уменьшаем шрифт для коинов на мобильных устройствах */
+            }
+
+            #level {
+                font-size: 1.8em;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -115,42 +142,25 @@
         <div id="level">Level: 1</div>
     </div>
 
-    <!-- Магазин -->
-    <div id="shop-container">
-        <button class="menu-button" id="shopButton">Купить Автокликера (150 000 коинов)</button>
-        <div id="shopMessage"></div>
-    </div>
-
-    <!-- Буст меню -->
-    <div id="boost-container">
-        <button class="menu-button" id="boostButton">Активировать Boost</button>
-        <div id="boostMessage"></div>
-    </div>
-
     <!-- Нижнее меню -->
     <div id="menu-container">
-        <button class="menu-button" id="farmMenuButton">
-            <img src="coin.png" alt="Монета">
-            Фарм
-        </button>
-        <button class="menu-button" id="shopMenuButton">
+        <div class="menu-button" id="farmMenuButton">
+            <img src="coin-icon.png" alt="Фарм">
+        </div>
+        <div class="menu-button" id="shopMenuButton">
             <img src="shop-icon.png" alt="Магазин">
-            Магазин
-        </button>
-        <button class="menu-button" id="boostMenuButton">
+        </div>
+        <div class="menu-button" id="boostMenuButton">
             <img src="boost-icon.png" alt="Буст">
-            Буст
-        </button>
+        </div>
     </div>
+
+    <!-- Boost текст -->
+    <div class="boost">🔥 Boost</div>
 
     <script>
         const counterDisplay = document.getElementById('counter');
         const clickImage = document.getElementById('clickImage');
-        const boostButton = document.getElementById('boostButton');
-        const boostMessage = document.getElementById('boostMessage');
-        const levelDisplay = document.getElementById('level');
-        const shopButton = document.getElementById('shopButton');
-        const shopMessage = document.getElementById('shopMessage');
         const farmContainer = document.getElementById('farm-container');
         const shopContainer = document.getElementById('shop-container');
         const boostContainer = document.getElementById('boost-container');
@@ -163,26 +173,6 @@
         let level = localStorage.getItem('level') ? parseInt(localStorage.getItem('level')) : 1;
 
         counterDisplay.textContent = count;
-        levelDisplay.textContent = `Level: ${level}`;
-
-        // Обработчики кнопок меню
-        farmMenuButton.addEventListener('click', function () {
-            farmContainer.style.display = 'flex';
-            shopContainer.style.display = 'none';
-            boostContainer.style.display = 'none';
-        });
-
-        shopMenuButton.addEventListener('click', function () {
-            farmContainer.style.display = 'none';
-            shopContainer.style.display = 'flex';
-            boostContainer.style.display = 'none';
-        });
-
-        boostMenuButton.addEventListener('click', function () {
-            farmContainer.style.display = 'none';
-            shopContainer.style.display = 'none';
-            boostContainer.style.display = 'flex';
-        });
 
         // Логика фарма коинов
         clickImage.addEventListener('click', function () {
@@ -191,7 +181,18 @@
             localStorage.setItem('coinCount', count);
         });
 
-        // Логика магазина и буста (продолжается...)
+        // Логика переключения меню
+        farmMenuButton.addEventListener('click', function () {
+            // показать фарм меню
+        });
+
+        shopMenuButton.addEventListener('click', function () {
+            // показать магазин
+        });
+
+        boostMenuButton.addEventListener('click', function () {
+            // показать буст
+        });
     </script>
 
 </body>
