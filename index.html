@@ -88,6 +88,8 @@
             align-items: center;
             cursor: pointer;
             transition: transform 0.2s ease-in-out;
+            outline: none;
+            user-select: none; /* Отключаем выделение */
         }
 
         .menu-button:hover {
@@ -98,6 +100,10 @@
             width: 35px;
             height: 35px;
             border-radius: 50%;
+        }
+
+        .menu-button:focus {
+            outline: none; /* Убираем синий контур */
         }
 
         /* Boost текст */
