@@ -89,7 +89,8 @@
             cursor: pointer;
             transition: transform 0.2s ease-in-out;
             outline: none;
-            user-select: none; /* Отключаем выделение */
+            user-select: none; /* Отключаем выделение текста */
+            -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат */
         }
 
         .menu-button:hover {
@@ -103,7 +104,7 @@
         }
 
         .menu-button:focus {
-            outline: none; /* Убираем синий контур */
+            outline: none; /* Убираем контур при фокусе */
         }
 
         /* Boost текст */
