@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кликер с уровнями и магазином</title>
+    <title>Кликер с уровнями, магазином и лидербордом</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,7 +36,7 @@
 
         /* Основное меню для фарма */
         .menu {
-            display: none; /* Скрываем все меню по умолчанию */
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -44,7 +44,7 @@
         }
 
         #farm-container {
-            display: flex; /* Показываем только фарм-меню по умолчанию */
+            display: flex;
         }
 
         /* Изображение для кликов */
@@ -53,13 +53,9 @@
             width: 250px;
             height: auto;
             transition: transform 0.1s ease-in-out;
-            outline: none; /* Убираем обводку при фокусе */
-            user-select: none; /* Запрещаем выделение */
-            -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат на мобильных устройствах */
-        }
-
-        #clickImage:focus {
-            outline: none; /* Убираем фокус на изображении */
+            outline: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #clickImage:active {
@@ -95,34 +91,59 @@
             cursor: pointer;
             transition: transform 0.2s ease-in-out;
             outline: none;
-            user-select: none; /* Отключаем выделение текста */
-            -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат */
-            border: none; /* Убираем обводку */
-        }
-
-        .menu-button:focus {
-            outline: none; /* Убираем выделение при фокусе */
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            border: none;
         }
 
         .menu-button:active {
-            background-color: #3a3a6f; /* Эффект нажатия на кнопку */
-        }
-
-        /* Скрываем стандартные стили на мобильных устройствах */
-        button, 
-        input, 
-        select, 
-        textarea {
-            -webkit-appearance: none; /* Убираем стандартный вид элементов */
-            appearance: none;
-            border: none; /* Убираем обводку */
-            outline: none; /* Убираем фокус */
+            background-color: #3a3a6f;
         }
 
         .menu-button img {
             width: 35px;
             height: 35px;
             border-radius: 50%;
+        }
+
+        /* Лидерборд */
+        #leaderboard-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #leaderboard {
+            font-size: 1.2em;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        #leaderboard ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #leaderboard li {
+            margin: 5px 0;
+        }
+
+        #leaderboard-button {
+            font-size: 1em;
+            padding: 10px;
+            background-color: #202053;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
         /* Boost текст */
@@ -168,6 +189,7 @@
     <div id="farm-container" class="menu">
         <img id="clickImage" src="your-tap-image.png" alt="Кликни сюда">
         <div id="level">Level: 1</div>
+        <button id="saveScoreButton">Сохранить результат</button>
     </div>
 
     <!-- Меню магазина -->
@@ -197,6 +219,18 @@
         <div class="menu-button" id="boostMenuButton">
             <img src="boost-icon.png" alt="Буст">
         </div>
+        <div class="menu-button" id="leaderboardButton">
+            <img src="leaderboard-icon.png" alt="Лидерборд">
+        </div>
+    </div>
+
+    <!-- Лидерборд -->
+    <div id="leaderboard-container">
+        <h2>Лидерборд</h2>
+        <div id="leaderboard">
+            <ul id="leaderboardList"></ul>
+        </div>
+        <button id="closeLeaderboardButton">Закрыть</button>
     </div>
 
     <script>
@@ -205,9 +239,14 @@
         const farmContainer = document.getElementById('farm-container');
         const shopContainer = document.getElementById('shop-container');
         const boostContainer = document.getElementById('boost-container');
+        const leaderboardContainer = document.getElementById('leaderboard-container');
+        const leaderboardList = document.getElementById('leaderboardList');
         const farmMenuButton = document.getElementById('farmMenuButton');
         const shopMenuButton = document.getElementById('shopMenuButton');
         const boostMenuButton = document.getElementById('boostMenuButton');
+        const leaderboardButton = document.getElementById('leaderboardButton');
+        const closeLeaderboardButton = document.getElementById('closeLeaderboardButton');
+        const saveScoreButton = document.getElementById('saveScoreButton');
         const buyAutoClickerButton = document.getElementById('buyAutoClickerButton');
         const activateBoostButton = document.getElementById('activateBoostButton');
         const buyClickUpgradeButton = document.getElementById('buyClickUpgradeButton');
@@ -241,6 +280,15 @@
 
         boostMenuButton.addEventListener('click', function () {
             showMenu(boostContainer);
+        });
+
+        leaderboardButton.addEventListener('click', function () {
+            leaderboardContainer.style.display = 'flex';
+            loadLeaderboard();
+        });
+
+        closeLeaderboardButton.addEventListener('click', function () {
+            leaderboardContainer.style.display = 'none';
         });
 
         // Функция для переключения видимых меню
@@ -302,6 +350,35 @@
                 localStorage.setItem('coinsPerClick', coinsPerClick);
             }
         });
+
+        // Сохранение результата в таблицу лидеров
+        saveScoreButton.addEventListener('click', function () {
+            let playerName = prompt("Введите ваше имя:");
+            if (playerName) {
+                saveScore(playerName, count);
+                alert("Результат сохранён!");
+            }
+        });
+
+        // Функция сохранения результата
+        function saveScore(playerName, score) {
+            let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            leaderboard.push({ name: playerName, score: score });
+            leaderboard.sort((a, b) => b.score - a.score); // Сортировка по убыванию
+            if (leaderboard.length > 10) leaderboard.pop(); // Лидерборд на 10 мест
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        // Функция загрузки лидерборда
+        function loadLeaderboard() {
+            leaderboardList.innerHTML = '';
+            let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            leaderboard.forEach((entry, index) => {
+                let li = document.createElement('li');
+                li.textContent = `${index + 1}. ${entry.name}: ${entry.score} коинов`;
+                leaderboardList.appendChild(li);
+            });
+        }
 
         // Показываем фарм-меню по умолчанию при загрузке
         showMenu(farmContainer);
