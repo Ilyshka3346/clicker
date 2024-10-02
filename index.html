@@ -91,20 +91,32 @@
             outline: none;
             user-select: none; /* Отключаем выделение текста */
             -webkit-tap-highlight-color: transparent; /* Убираем синий квадрат */
+            border: none; /* Убираем обводку */
         }
 
-        .menu-button:hover {
-            transform: scale(1.1);
+        .menu-button:focus {
+            outline: none; /* Убираем выделение при фокусе */
+        }
+
+        .menu-button:active {
+            background-color: #3a3a6f; /* Эффект нажатия на кнопку */
+        }
+
+        /* Скрываем стандартные стили на мобильных устройствах */
+        button, 
+        input, 
+        select, 
+        textarea {
+            -webkit-appearance: none; /* Убираем стандартный вид элементов */
+            appearance: none;
+            border: none; /* Убираем обводку */
+            outline: none; /* Убираем фокус */
         }
 
         .menu-button img {
             width: 35px;
             height: 35px;
             border-radius: 50%;
-        }
-
-        .menu-button:focus {
-            outline: none; /* Убираем контур при фокусе */
         }
 
         /* Boost текст */
